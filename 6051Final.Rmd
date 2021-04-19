@@ -1,0 +1,157 @@
+---
+title: '6051'
+author: "Sizheng Zhu"
+date: "3/23/2021"
+output: html_document
+---
+
+Booklet 5
+
+Number of students: 501
+
+The TIMSS Advanced 2015 Mathematics Framework consists of three content domains: (1)algebra, (2)calculus, and (3)geometry. A matrix-sampling approach was used to assemble the pool of advanced mathematics achievement items into a set of 6 assessment booklets, with each student completing one booklet only. 
+Data from booklet 5 were utilized in this study. Booklet 5 consisted of 3 blocks(M5, M8 and M9). It contained responses from 501 students to 40 items with 12 items on algebra, 18 items on calculus and 10 items on geometry. Omitted responses and partially correct responses were treated as incorrect in this study.
+
+
+#Data cleaning
+
+```{r}
+#install.packages("haven")
+library(haven)
+
+data = read_sav("MSAUSAM3.sav")
+#####
+str(data)
+
+book5<-data[data$IDBOOK==5,]
+
+book5_1<-book5[,c(55:65,91:119)]
+
+book5_2<-book5_1
+
+book5_2[is.na(book5_2)] <- 0
+
+###
+###M5
+
+book5_2$MA23144<-ifelse(book5_2$MA23144==3,"1","0")
+book5_2$MA23185<-ifelse(book5_2$MA23185==1,"1","0")
+book5_2$MA23054<-ifelse(book5_2$MA23054%in%c(20,21),"1","0")
+book5_2$MA23064<-ifelse(book5_2$MA23064==1,"1","0")
+book5_2$MA23131A<-ifelse(book5_2$MA23131A==10,"1","0")
+book5_2$MA23131B<-ifelse(book5_2$MA23131B%in%c(10,11),"1","0")
+book5_2$MA23157<-ifelse(book5_2$MA23157==20,"1","0")
+book5_2$MA23045<-ifelse(book5_2$MA23045==3,"1","0")
+book5_2$MA23082<-ifelse(book5_2$MA23082==1,"1","0")
+book5_2$MA23020<-ifelse(book5_2$MA23020==4,"1","0")
+book5_2$MA23094<-ifelse(book5_2$MA23094%in%c(20,21,22),"1","0")
+
+
+###M8
+book5_2$MA33091<-ifelse(book5_2$MA33091==10,"1","0")
+book5_2$MA33106<-ifelse(book5_2$MA33106==2,"1","0")
+book5_2$MA33090<-ifelse(book5_2$MA33090==20,"1","0")
+book5_2$MA33126<-ifelse(book5_2$MA33126==2,"1","0")
+book5_2$MA33118A<-ifelse(book5_2$MA33118A==1,"1","0")
+book5_2$MA33118B<-ifelse(book5_2$MA33118B==3,"1","0")
+book5_2$MA33118C<-ifelse(book5_2$MA33118C==2,"1","0")
+book5_2$MA33118<-ifelse(book5_2$MA33118==20,"1","0")
+book5_2$MA33243<-ifelse(book5_2$MA33243%in%c(20,21),"1","0")
+book5_2$MA33229<-ifelse(book5_2$MA33229==10,"1","0")
+book5_2$MA33011<-ifelse(book5_2$MA33011==1,"1","0")
+book5_2$MA33159<-ifelse(book5_2$MA33159==10,"1","0")
+book5_2$MA33054<-ifelse(book5_2$MA33054==4,"1","0")
+
+
+####M9
+book5_2$MA33085<-ifelse(book5_2$MA33085==4,"1","0")
+book5_2$MA33190<-ifelse(book5_2$MA33190==10,"1","0")
+book5_2$MA33115<-ifelse(book5_2$MA33115==3,"1","0")
+book5_2$MA33237<-ifelse(book5_2$MA33237==10,"1","0")
+book5_2$MA33077<-ifelse(book5_2$MA33077==1,"1","0")
+book5_2$MA33132<-ifelse(book5_2$MA33132==1,"1","0")
+book5_2$MA33218<-ifelse(book5_2$MA33218==20,"1","0")
+book5_2$MA33236A<-ifelse(book5_2$MA33236A==3,"1","0")
+book5_2$MA33236B<-ifelse(book5_2$MA33236B==2,"1","0")
+book5_2$MA33236C<-ifelse(book5_2$MA33236C==1,"1","0")
+book5_2$MA33236D<-ifelse(book5_2$MA33236D==2,"1","0")
+book5_2$MA33236<-ifelse(book5_2$MA33236==20,"1","0")
+book5_2$MA33181<-ifelse(book5_2$MA33181==3,"1","0")
+book5_2$MA33002<-ifelse(book5_2$MA33002==10,"1","0")
+book5_2$MA33169<-ifelse(book5_2$MA33169==2,"1","0")
+book5_2$MA33235<-ifelse(book5_2$MA33235==10,"1","0")
+
+
+cols.num <- c(colnames(book5_2))
+
+book5_2[cols.num] <- sapply(book5_2[cols.num],as.numeric)
+
+Alg<-book5_2[,c(1:5,12:14,25:28)]
+Cal<-book5_2[,c(6:8,15:21,29:36)]
+Geo<-book5_2[,c(9:11,22:24,37:40)]
+
+data_scored<-cbind(Alg,Cal,Geo)
+cbind(Alg,Cal,Geo)
+
+###subscore pacakge
+library(subscore)
+
+#generate the data list for the main function
+prep1<-data.prep(data_scored,c(3,12,18,10),
+                         c("Algebra","Calculus","Geometry", "Math"))
+
+```
+
+
+###Haberman's methods 
+```{r}
+
+# Estimating subscores using Haberman's methods       
+CTTsub(prep1,method="Haberman")
+
+# Obtaining raw subscores  
+CTTsub(prep1,method="Haberman")$subscore.original  
+
+# Obtaining descriptive statistics summary for estimated subscores  
+CTTsub(prep1,method="Haberman")$summary 
+
+# Obtaining original correlation for the three methods
+CTTsub(prep1,method="Haberman")$Correlation  
+
+# Obtaining disattenuated correlation for the three methods
+CTTsub(prep1,method="Haberman")$Disattenuated.correlation  
+
+# Obtaining PRMSEs for the three methods
+CTTsub(prep1,method="Haberman")$PRMSE  
+
+# Obtaining subscores that are estimated as a function of the observed subscores 
+CTTsub(prep1,method="Haberman")$subscore.s 
+
+# Obtaining subscores that are estimated as a function of the observed total score 
+CTTsub(prep1,method="Haberman")$subscore.x  
+
+# Obtaining subscores that are estimated as a function of both the observed subscores and the observed total score.
+CTTsub(prep1,method="Haberman")$subscore.sx  
+
+# Hypothesis test
+CTTsub(prep1,method="Haberman")$PRMSE.test
+
+```
+
+#Wainer's method
+
+```{r}
+# Estimating subscores using Wainer's method
+CTTsub(prep1,method="Wainer") 
+       
+# Obtaining descriptive statistics summary for subscores
+CTTsub(prep1,method="Wainer")$summary   
+
+# Obtaining original subscores
+CTTsub(prep1,method="Wainer")$subscore.original 
+
+# Obtaining subscores that are estimated using Wainer's augmentation method  
+CTTsub(prep1,method="Wainer")$subscore.augmented  
+
+```
+
